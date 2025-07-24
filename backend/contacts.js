@@ -8,7 +8,11 @@ const PORT = 3001;
 app.use(cors());
 
 // Firestore setup
-const serviceAccountPath = './serviceAccountKey.json';
+const { SecretManagerServiceClient } = require('@google-cloud/secret-manager');
+const { Storage } = require('@google-cloud/storage');
+
+const serviceAccountPath = require('./secrets/serviceAccountKey.json');
+
 if (!fs.existsSync(serviceAccountPath)) {
   console.error('Missing serviceAccountKey.json. Download it from Firebase Console and place it in backend/.');
   process.exit(1);
