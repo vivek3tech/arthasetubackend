@@ -43,6 +43,27 @@ readSecret('my-service-account-key')
     const contactsCollection = db.collection('contacts');
     const balanceDoc = db.collection('accounts').doc('main');
 
+    app.get('/api/contacts', async (req, res) => {
+      try {
+        const snapshot = await contactsCollection.get();
+        console.log('Firestore snapshot size:', snapshot.size);
+        if (snapshot.empty) {
+          // Seed Firestore if empty
+          console.log('Seeding Firestore with sample contacts...');
+          await Promise.all(sampleContacts.map(contact => contactsCollection.add(contact)));
+          // Fetch again after seeding
+          const seededSnapshot = await contactsCollection.get();
+          const seededContacts = seededSnapshot.docs.map(doc => doc.data());
+          return res.json(seededContacts);
+        }
+        const contacts = snapshot.docs.map(doc => doc.data());
+        res.json(contacts);
+      } catch (err) {
+        console.error('Firestore error:', err);
+        res.status(500).json({ error: 'Failed to fetch contacts', details: err.message });
+      }
+    });
+
     app.get('/api/balance', async (req, res) => {
       try {
         const doc = await balanceDoc.get();
