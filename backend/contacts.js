@@ -3,7 +3,7 @@ const cors = require('cors');
 const admin = require('firebase-admin');
 const fs = require('fs');
 const app = express();
-const PORT = 3001;
+const PORT = 8080;
 
 app.use(cors());
 
