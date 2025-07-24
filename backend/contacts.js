@@ -4,7 +4,7 @@ const { SecretManagerServiceClient } = require('@google-cloud/secret-manager');
 const admin = require('firebase-admin');
 const fs = require('fs');
 const app = express();
-const PORT = 3001;
+const PORT = 8080;
 
 app.use(cors());
 
@@ -90,4 +90,4 @@ app.listen(PORT, () => {
 // Instructions:
 // 1. Go to Firebase Console > Project Settings > Service Accounts.
 // 2. Generate a new private key and download serviceAccountKey.json.
-// 3. Place it in the backend/ directory. 
+// 3. Place it in the backend/ directory.
