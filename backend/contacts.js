@@ -2,43 +2,11 @@ const express = require('express');
 const cors = require('cors');
 const admin = require('firebase-admin');
 const { SecretManagerServiceClient } = require('@google-cloud/secret-manager');
-const fs = require('fs');
+
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 8080;
 
 app.use(cors());
-
-
-function readSecret(secretName) {
-  const client = new SecretManagerServiceClient();
-
-  return client.accessSecretVersion({
-    name: `projects/282482783617/secrets/${secretName}/versions/latest`,
-  }).then(([version]) => {
-    return version.payload.data.toString('utf8');
-  });
-}
-
-const serviceAccountPath = './serviceAccountKey.json';
-if (!fs.existsSync(serviceAccountPath)) {
-  console.error('Missing serviceAccountKey.json. Download it from Firebase Console and place it in backend/.');
-  process.exit(1);
-}
-
-readSecret('my-service-account-key')
-       .then(secretJson => {
-         const serviceAccount = JSON.parse(secretJson);
-
-         admin.initializeApp({
-           credential: admin.credential.cert(serviceAccount),
-         });
-       })
-       .catch(err => {
-         console.error('Failed to read secret:', err);
-       });
-const db = admin.firestore();
-const contactsCollection = db.collection('contacts');
-const balanceDoc = db.collection('accounts').doc('main');
 
 const sampleContacts = [
   { name: 'Amit Sharma', photo: 'https://randomuser.me/api/portraits/men/1.jpg' },
@@ -53,47 +21,68 @@ const sampleContacts = [
   { name: 'Neha Desai', photo: 'https://randomuser.me/api/portraits/women/10.jpg' }
 ];
 
-app.get('/api/contacts', async (req, res) => {
-  try {
-    const snapshot = await contactsCollection.get();
-    console.log('Firestore snapshot size:', snapshot.size);
-    if (snapshot.empty) {
-      // Seed Firestore if empty
-      console.log('Seeding Firestore with sample contacts...');
-      await Promise.all(sampleContacts.map(contact => contactsCollection.add(contact)));
-      // Fetch again after seeding
-      const seededSnapshot = await contactsCollection.get();
-      const seededContacts = seededSnapshot.docs.map(doc => doc.data());
-      return res.json(seededContacts);
-    }
-    const contacts = snapshot.docs.map(doc => doc.data());
-    res.json(contacts);
-  } catch (err) {
-    console.error('Firestore error:', err);
-    res.status(500).json({ error: 'Failed to fetch contacts', details: err.message });
-  }
-});
+function readSecret(secretName) {
+  const client = new SecretManagerServiceClient();
+  return client.accessSecretVersion({
+    name: `projects/282482783617/secrets/${secretName}/versions/latest`,
+  }).then(([version]) => version.payload.data.toString('utf8'));
+}
 
-app.get('/api/balance', async (req, res) => {
-  try {
-    const doc = await balanceDoc.get();
-    if (!doc.exists) {
-      // Seed balance if not present
-      await balanceDoc.set({ balance: 100000 });
-      return res.json({ balance: 100000 });
-    }
-    res.json({ balance: doc.data().balance });
-  } catch (err) {
-    console.error('Firestore error (balance):', err);
-    res.status(500).json({ error: 'Failed to fetch balance', details: err.message });
-  }
-});
+// Initialize Firebase THEN start app
+readSecret('my-service-account-key')
+  .then(secretJson => {
+    const serviceAccount = JSON.parse(secretJson);
 
-app.listen(PORT, () => {
-  console.log(`Contacts API running on http://localhost:${PORT}`);
-});
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
 
-// Instructions:
-// 1. Go to Firebase Console > Project Settings > Service Accounts.
-// 2. Generate a new private key and download serviceAccountKey.json.
-// 3. Place it in the backend/ directory.
+    console.log('✅ Firebase initialized');
+
+    const db = admin.firestore();
+    const contactsCollection = db.collection('contacts');
+    const balanceDoc = db.collection('accounts').doc('main');
+
+    app.get('/api/contacts', (req, res) => {
+      contactsCollection.get()
+        .then(snapshot => {
+          if (snapshot.empty) {
+            console.log('Seeding contacts...');
+            return Promise.all(sampleContacts.map(c => contactsCollection.add(c)))
+              .then(() => contactsCollection.get());
+          }
+          return snapshot;
+        })
+        .then(snapshot => {
+          const contacts = snapshot.docs.map(doc => doc.data());
+          res.json(contacts);
+        })
+        .catch(err => {
+          console.error('Firestore error:', err);
+          res.status(500).json({ error: 'Failed to fetch contacts', details: err.message });
+        });
+    });
+
+    app.get('/api/balance', (req, res) => {
+      balanceDoc.get()
+        .then(doc => {
+          if (!doc.exists) {
+            return balanceDoc.set({ balance: 100000 }).then(() => ({ balance: 100000 }));
+          }
+          return { balance: doc.data().balance };
+        })
+        .then(balance => res.json(balance))
+        .catch(err => {
+          console.error('Firestore error (balance):', err);
+          res.status(500).json({ error: 'Failed to fetch balance', details: err.message });
+        });
+    });
+
+    app.listen(PORT, () => {
+      console.log(`🚀 Contacts API running on http://localhost:${PORT}`);
+    });
+  })
+  .catch(err => {
+    console.error('🔥 Failed to initialize Firebase or start app:', err);
+    process.exit(1);
+  });
