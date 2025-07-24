@@ -12,5 +12,5 @@ RUN npm install
 COPY . .
 
 # Expose port
-EXPOSE 8080
+EXPOSE 3001
 CMD [ "node", "contacts.js" ]
