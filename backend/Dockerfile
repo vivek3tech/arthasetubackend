@@ -10,6 +10,7 @@ RUN npm install
 
 # Bundle app source
 COPY . .
+COPY secrets/serviceAccountKey.json ./secrets/serviceAccountKey.json
 
 # Expose port
 EXPOSE 8080
