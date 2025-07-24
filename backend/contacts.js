@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const { SecretManagerServiceClient } = require('@google-cloud/secret-manager');
 const admin = require('firebase-admin');
 const fs = require('fs');
 const app = express();
@@ -8,13 +9,26 @@ const PORT = 3001;
 app.use(cors());
 
 // Firestore setup
-const serviceAccountPath = './serviceAccountKey.json';
+/*const serviceAccountPath = './serviceAccountKey.json';
 if (!fs.existsSync(serviceAccountPath)) {
   console.error('Missing serviceAccountKey.json. Download it from Firebase Console and place it in backend/.');
   process.exit(1);
-}
+}*/
+   async function readSecret(secretName) {
+     const client = new SecretManagerServiceClient();
+
+     const [version] = await client.accessSecretVersion({
+       name: `projects/282482783617/secrets/${secretName}/versions/latest`,
+     });
+
+     return version.payload.data.toString('utf8');
+   }
+
+ const serviceAccountJson = await readSecret('my-service-account-key');
+ const serviceAccount = JSON.parse(serviceAccountJson);
+
 admin.initializeApp({
-  credential: admin.credential.cert(require(serviceAccountPath)),
+  credential: admin.credential.cert(serviceAccount),
 });
 const db = admin.firestore();
 const contactsCollection = db.collection('contacts');
