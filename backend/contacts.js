@@ -7,7 +7,7 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 
 app.use(cors());
-
+app.use(express.json());
 const sampleContacts = [
   { name: 'Amit Sharma', photo: 'https://randomuser.me/api/portraits/men/1.jpg' },
   { name: 'Priya Singh', photo: 'https://randomuser.me/api/portraits/women/2.jpg' },
@@ -42,6 +42,7 @@ readSecret('my-service-account-key')
     const db = admin.firestore();
     const contactsCollection = db.collection('contacts');
     const balanceDoc = db.collection('accounts').doc('main');
+    const transactionsCollection = db.collection('transactions');
 
     app.get('/api/contacts', async (req, res) => {
       try {
