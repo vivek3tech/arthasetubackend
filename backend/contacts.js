@@ -18,7 +18,7 @@ const sampleContacts = [
   { name: 'Rohit Gupta', photo: 'https://randomuser.me/api/portraits/men/7.jpg' },
   { name: 'Kavita Rao', photo: 'https://randomuser.me/api/portraits/women/8.jpg' },
   { name: 'Suresh Kumar', photo: 'https://randomuser.me/api/portraits/men/9.jpg' },
-  { name: 'Neha Desai', photo: 'https://randomuser.me/api/portraits/women/10.jpg' }
+  { name: 'Neha Desai', photo: 'https://randomuser.me/api/portraits/women/10.jpg' },
    { name: 'अमित शर्मा', photo: 'https://randomuser.me/api/portraits/men/1.jpg' },
     { name: 'प्रिया सिंह', photo: 'https://randomuser.me/api/portraits/women/2.jpg' },
     { name: 'राहुल वर्मा', photo: 'https://randomuser.me/api/portraits/men/3.jpg' },
