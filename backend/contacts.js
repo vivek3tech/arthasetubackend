@@ -19,6 +19,16 @@ const sampleContacts = [
   { name: 'Kavita Rao', photo: 'https://randomuser.me/api/portraits/women/8.jpg' },
   { name: 'Suresh Kumar', photo: 'https://randomuser.me/api/portraits/men/9.jpg' },
   { name: 'Neha Desai', photo: 'https://randomuser.me/api/portraits/women/10.jpg' }
+   { name: 'अमित शर्मा', photo: 'https://randomuser.me/api/portraits/men/1.jpg' },
+    { name: 'प्रिया सिंह', photo: 'https://randomuser.me/api/portraits/women/2.jpg' },
+    { name: 'राहुल वर्मा', photo: 'https://randomuser.me/api/portraits/men/3.jpg' },
+    { name: 'स्नेहा पटेल', photo: 'https://randomuser.me/api/portraits/women/4.jpg' },
+    { name: 'विक्रम जोशी', photo: 'https://randomuser.me/api/portraits/men/5.jpg' },
+    { name: 'अंजली मेहरा', photo: 'https://randomuser.me/api/portraits/women/6.jpg' },
+    { name: 'रोहित गुप्ता', photo: 'https://randomuser.me/api/portraits/men/7.jpg' },
+    { name: 'कविता राव', photo: 'https://randomuser.me/api/portraits/women/8.jpg' },
+    { name: 'सुरेश कुमार', photo: 'https://randomuser.me/api/portraits/men/9.jpg' },
+    { name: 'नेहा देसाई', photo: 'https://randomuser.me/api/portraits/women/10.jpg' }
 ];
 
 function readSecret(secretName) {
